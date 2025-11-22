@@ -1,4 +1,12 @@
-"""Minimal Python script template that aims for a perfect pylint score.
+"""Data Preprocessing
 """
 
 from __future__ import annotations
+from ucimlrepo import fetch_ucirepo
+
+# fetch dataset
+default_of_credit_card_clients = fetch_ucirepo(id=350)
+
+# data (as pandas dataframes)
+X = default_of_credit_card_clients.data.features
+y = default_of_credit_card_clients.data.targets
