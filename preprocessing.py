@@ -9,10 +9,14 @@ from sklearn.model_selection import train_test_split
 default_of_credit_card_clients = fetch_ucirepo(id=350)
 
 # data (as pandas dataframes)
-X = default_of_credit_card_clients.data.features
+x = default_of_credit_card_clients.data.features
 y = default_of_credit_card_clients.data.targets
 
 # split dataframes into train and test subsets
-# the naming style is consistent with the sklearn documentation, but it doesn't conform to
-# UPPER_CASE naming style per pylint
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
+
+# save variables in pkl files
+x_train.to_pickle("x_train.pkl")
+y_train.to_pickle("y_train.pkl")
+x_test.to_pickle("x_test.pkl")
+y_test.to_pickle("y_test.pkl")
