@@ -2,6 +2,7 @@
 """
 
 from __future__ import annotations
+from statistics import harmonic_mean
 from itertools import combinations, chain
 import pandas as pd
 import numpy as np
@@ -27,7 +28,7 @@ def read_data(filepath, istarget):
     return df
 
 # Avoid running this or not imports will last forever...
-if __name__ == "main":
+if __name__ == "__main__":
 
     def score_feature_indices(x_tr, y_tr, x_te, y_te, cols):
         """
@@ -43,15 +44,18 @@ if __name__ == "main":
 
         # If we've previously scored and saved the score in the dictionary, we simply retrieve it
         # Otherwise, we score and save the score in the dictionary
-        if cols in subset_scores:
-            score = subset_scores[cols]
+        if cols in subset_trscores:
+            trscore = subset_trscores[cols]
+            tescore = subset_tescores[cols]
         else:
             clf = get_clf().fit(x_tr.iloc[:, list(cols)], y_tr)
-            score = clf.score(x_te.iloc[:, list(cols)], y_te)
-            subset_scores[cols] = score
-            f.write(f"{str(cols):<82}: {score:.5f} \n")
+            trscore = clf.score(x_tr.iloc[:, list(cols)], y_tr)
+            tescore = clf.score(x_te.iloc[:, list(cols)], y_te)
+            subset_trscores[cols] = trscore
+            subset_tescores[cols] = tescore
+            f.write(f"{str(cols):<82} {trscore:.5f} {tescore:.5f}\n")
 
-        return score
+        return harmonic_mean([trscore, tescore])
 
     def all_combinations(iterable):
         """
@@ -106,7 +110,8 @@ if __name__ == "main":
     # Less is more!
 
     # Dictionary to store the scores for each subset
-    subset_scores = {}
+    subset_trscores = {}
+    subset_tescores = {}
 
     # The various groups of column indices
     col_groups = [[0], [1], [2], [3], [4], range(5,11), range(11,17), range(17,23)]
@@ -118,6 +123,7 @@ if __name__ == "main":
     # Open output file to read into
     # and select the best column indexes to be used
     with open("randforest_feature_scores.txt", "a", encoding="utf-8") as f:
+        f.write(f"{'features':<82} {'train':>7} {'test':>7}\n")
         col_idxs = select_best_features_groups(x_train, y_train, x_test, y_test, col_groups)
 
     print(col_idxs)

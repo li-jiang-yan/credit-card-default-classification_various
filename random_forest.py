@@ -27,30 +27,22 @@ def classification_report_table(clf, x, y_true, labels, title):
 # PAY_AMTX: PAY_AMT1 - PAY_AMT6     (X18-X23)
 # Less is more!
 
-col_idxs_list = [
-    [6],
-    [1, 6],
-    [0, 1, 2, 4, 6, 11, 12, 13, 14, 15, 16],
-    [0, 2, 4, 6, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
-    [0, 1, 2, 4, 6, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-]
+col_idxs = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
-for col_idxs in col_idxs_list:
-    print(f"col_idxs = {col_idxs}")
-    # Load data from pkl files
-    x_train = read_data(filepath="x_train.pkl", istarget=False)
-    y_train = read_data(filepath="y_train.pkl", istarget=True)
-    x_test = read_data(filepath="x_test.pkl", istarget=False)
-    y_test = read_data(filepath="y_test.pkl", istarget=True)
+# Load data from pkl files
+x_train = read_data(filepath="x_train.pkl", istarget=False)
+y_train = read_data(filepath="y_train.pkl", istarget=True)
+x_test = read_data(filepath="x_test.pkl", istarget=False)
+y_test = read_data(filepath="y_test.pkl", istarget=True)
 
-    # Train ML model
-    x_train = x_train.iloc[:, col_idxs]
-    x_test = x_test.iloc[:, col_idxs]
-    cls = get_clf()
-    cls.fit(x_train, y_train)
+# Train ML model
+x_train = x_train.iloc[:, col_idxs]
+x_test = x_test.iloc[:, col_idxs]
+cls = get_clf()
+cls.fit(x_train, y_train)
 
-    # Evaluate ML model training and testing performance
-    print(classification_report_table(cls, x_train, y_train, [0,1], \
-                                    "classification_report(x_train, y_train)"))
-    print(classification_report_table(cls, x_test, y_test, [0,1], \
-                                    "classification_report(x_test, y_test)"))
+# Evaluate ML model training and testing performance
+print(classification_report_table(cls, x_train, y_train, [0,1], \
+                                "classification_report(x_train, y_train)"))
+print(classification_report_table(cls, x_test, y_test, [0,1], \
+                                "classification_report(x_test, y_test)"))
