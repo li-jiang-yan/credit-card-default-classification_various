@@ -1,41 +1,18 @@
-"""Feature selection for support vector machines
+"""Feature selection for logistic regression
 """
 
 from __future__ import annotations
 from statistics import harmonic_mean
 from itertools import chain
-from sklearn.svm import LinearSVC
-from sklearn.pipeline import make_pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
 from common_functions import read_data, all_combinations
 
 # Functions for scalability
-def get_clf(cols):
+def get_clf():
     """
     Return a clean classifier with the parameters
     """
-    # All categorical and numeric columns of the dataset
-    cat = range(1, 4)
-
-    # Categorical and numeric columns in cols
-    cat_cols = [n for n, elem in enumerate(cols) if elem in cat]
-    num_cols = [n for n, elem in enumerate(cols) if elem not in cat]
-
-    # Make column transformer
-    transformers = []
-    if cat_cols:
-        transformers.append(("encoder", OneHotEncoder(), cat_cols))
-    if num_cols:
-        transformers.append(("scaler", StandardScaler(), num_cols))
-    ct = ColumnTransformer(transformers)
-
-    # Make pipeline
-    clf = make_pipeline(
-        ct,
-        LinearSVC(random_state=0, class_weight="balanced")
-    )
-    return clf
+    return LogisticRegression(random_state=0, solver="liblinear", class_weight="balanced")
 
 # Avoid running this or not imports will last forever...
 if __name__ == "__main__":
@@ -49,13 +26,13 @@ if __name__ == "__main__":
         if not isinstance(cols, tuple):
             cols = tuple(cols)
 
-        # If we've previously scored and saved the score in the dictionary, we simply retrieve it
-        # Otherwise, we score and save the score in the dictionary
+        # If we've previously scored and saved the score in the dictionaries, we simply retrieve
+        # it. Otherwise, we score and save the score in the dictionaries
         if cols in subset_trscores:
             trscore = subset_trscores[cols]
             tescore = subset_tescores[cols]
         else:
-            clf = get_clf(cols).fit(x_tr.iloc[:, list(cols)], y_tr)
+            clf = get_clf().fit(x_tr.iloc[:, list(cols)], y_tr)
             trscore = clf.score(x_tr.iloc[:, list(cols)], y_tr)
             tescore = clf.score(x_te.iloc[:, list(cols)], y_te)
             subset_trscores[cols] = trscore
@@ -98,8 +75,8 @@ if __name__ == "__main__":
 
     # Shortlist features
     # If we do a naive brute force through all variables, we will have to deal with 2^23
-    # combinations which will take too much time. On the other hand, we can group features in the
-    # various groups
+    # combinations which will take too much time. On the other hand, we can group features
+    # in the various groups
     # LIMIT_BAL                         (X1)
     # SEX                               (X2)
     # EDUCATION                         (X3)
@@ -118,12 +95,12 @@ if __name__ == "__main__":
     col_groups = [[0], [1], [2], [3], [4], range(5,11), range(11,17), range(17,23)]
 
     # Wipe contents of output file
-    with open("svm_feature_scores.txt", "w", encoding="utf-8") as f:
+    with open("logreg_feature_scores.txt", "w", encoding="utf-8") as f:
         pass
 
-    # Open output file to write into
+    # Open output file to read into
     # and select the best column indexes to be used
-    with open("svm_feature_scores.txt", "a", encoding="utf-8") as f:
+    with open("logreg_feature_scores.txt", "a", encoding="utf-8") as f:
         f.write(f"{'features':<82} {'train':>7} {'test':>7}\n")
         col_idxs = select_best_features_groups(x_train, y_train, x_test, y_test, col_groups)
         print(f"Best column indexes: {col_idxs}") # [6]

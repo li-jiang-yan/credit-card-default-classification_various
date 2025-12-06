@@ -1,12 +1,11 @@
-"""Random Forest Feature Selection
+"""Feature selection for random forest
 """
 
 from __future__ import annotations
 from statistics import harmonic_mean
-from itertools import combinations, chain
-import pandas as pd
-import numpy as np
+from itertools import chain
 from sklearn.ensemble import RandomForestClassifier
+from common_functions import read_data, all_combinations
 
 # Functions for scalability
 def get_clf():
@@ -14,18 +13,6 @@ def get_clf():
     Return a clean classifier with the parameters
     """
     return RandomForestClassifier(random_state=0, class_weight="balanced")
-
-def read_data(filepath, istarget):
-    """
-    Return the feature/target data from a pkl file
-    """
-    df = pd.read_pickle(filepath)
-
-    # If the data is a target DataFrame, apply ravel to suppress warnings from classifier
-    if istarget:
-        return np.ravel(df)
-
-    return df
 
 # Avoid running this or not imports will last forever...
 if __name__ == "__main__":
@@ -35,15 +22,12 @@ if __name__ == "__main__":
         Return the model testing accuracy for a given list of feature indices
         """
         # Make cols a tuple if it is not
+        # cols need to be a tuple to be a dictionary key
         if not isinstance(cols, tuple):
             cols = tuple(cols)
 
-        # Supress the warnings from the classifier
-        y_tr = np.ravel(y_tr)
-        y_te = np.ravel(y_te)
-
-        # If we've previously scored and saved the score in the dictionary, we simply retrieve it
-        # Otherwise, we score and save the score in the dictionary
+        # If we've previously scored and saved the score in the dictionaries, we simply retrieve
+        # it. Otherwise, we score and save the score in the dictionaries
         if cols in subset_trscores:
             trscore = subset_trscores[cols]
             tescore = subset_tescores[cols]
@@ -56,12 +40,6 @@ if __name__ == "__main__":
             f.write(f"{str(cols):<82} {trscore:.5f} {tescore:.5f}\n")
 
         return harmonic_mean([trscore, tescore])
-
-    def all_combinations(iterable):
-        """
-        Return all combinations of the iterable starting from length 1 to the length of the iterable
-        """
-        return chain.from_iterable(combinations(iterable, r) for r in range(1, len(iterable)+1))
 
     def select_best_features(x_tr, y_tr, x_te, y_te, candidates):
         """
@@ -124,7 +102,4 @@ if __name__ == "__main__":
     # and select the best column indexes to be used
     with open("randforest_feature_scores.txt", "a", encoding="utf-8") as f:
         f.write(f"{'features':<82} {'train':>7} {'test':>7}\n")
-        col_idxs = select_best_features_groups(x_train, y_train, x_test, y_test, col_groups)
-
-    print(col_idxs)
-    # [1, 2, 3, 4, 6, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+        select_best_features_groups(x_train, y_train, x_test, y_test, col_groups)
