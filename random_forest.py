@@ -1,4 +1,4 @@
-"""Logistic Regression
+"""Random Forest
 """
 
 from __future__ import annotations
@@ -14,19 +14,7 @@ def classification_report_table(clf, x, y_true, labels, title):
     clf_report = classification_report(y_true, y_pred, labels=labels)
     return f"{title}\n{clf_report}"
 
-# Shortlist features
-# If we do a naive brute force through all variables, we will have to deal with 2^23 combinations
-# which will take too much time. On the other hand, we can group features in the various groups
-# LIMIT_BAL                         (X1)
-# SEX                               (X2)
-# EDUCATION                         (X3)
-# MARRIAGE                          (X4)
-# AGE                               (X5)
-# PAY_X: PAY_0 - PAY_6              (X6-X11)
-# BILL_AMTX: BILL_AMT1 - BILL_AMT6  (X12-X17)
-# PAY_AMTX: PAY_AMT1 - PAY_AMT6     (X18-X23)
-# Less is more!
-
+# Select best column indexes based on randforest_feature_scores.txt
 col_idxs = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
 # Load data from pkl files
